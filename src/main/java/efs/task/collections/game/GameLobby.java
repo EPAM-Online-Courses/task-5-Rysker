@@ -4,9 +4,8 @@ import efs.task.collections.data.DataProvider;
 import efs.task.collections.entity.Hero;
 import efs.task.collections.entity.Town;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class GameLobby {
 
@@ -28,29 +27,85 @@ public class GameLobby {
 
     //TODO Dodać miasta i odpowiadających im bohaterów z DLC gry do mapy dostępnych
     // miast - playableTownsWithHeroesList, tylko jeżeli jeszcze się na niej nie znajdują.
-    public void enableDLC() {}
+    public void enableDLC()
+    {
+        DataProvider tmp = new DataProvider();
+        Map<Town, List<Hero>> map1 = getPlayableTownsWithHeroesList();
+        List<Town> dlcTowns = tmp.getDLCTownsList();
+        for(var x: dlcTowns)
+        {
+            List<Hero> heroes = (List<Hero>) tmp.getDLCHeroesSet();
+            map1.putIfAbsent(x, heroes);
+        }
+    }
 
 
     //TODO Usunąć miasta i odpowiadających im bohaterów z DLC gry z mapy dostępnych
     // miast - playableTownsWithHeroesList.
-    public void disableDLC() {}
+    public void disableDLC()
+    {
+        DataProvider tmp = new DataProvider();
+        Map<Town, List<Hero>> map1 = getPlayableTownsWithHeroesList();
+        List<Town> dlcTowns = tmp.getDLCTownsList();
+        for(var x: dlcTowns)
+        {
+            List<Hero> heroes = (List<Hero>) tmp.getDLCHeroesSet();
+            for(var p : heroes)
+            {
+                map1.entrySet().stream()
+                        .map(i -> i.getValue() != p);
+            }
+        }
+    }
 
     // TODO Sprawdza czy mapa playableCharactersByTown zawiera dane miasto.
     //  Jeśli tak zwróć listę bohaterów z tego miasta.
     //  Jeśli nie rzuć wyjątek NoSuchElementException z wiadomością NO_SUCH_TOWN + town.getName()
-    public List<Hero> getHeroesFromTown(Town town) { return null;}
+    public List<Hero> getHeroesFromTown(Town town)
+    {
+        DataProvider tmp = new DataProvider();
+        if(getPlayableTownsWithHeroesList().containsKey(town))
+            return getPlayableTownsWithHeroesList().get(town);
+        else
+        {
+            throw new NoSuchElementException(NO_SUCH_TOWN + town.getTownName());
+        }
+    }
 
     // TODO Metoda powinna zwracać mapę miast w kolejności alfabetycznej z odpowiadającymi im bohaterami.
     //  Każde z miast charakteryzuje się dwoma klasami bohaterów dostępnymi dla tego miasta - Town.startingHeroClass.
     //  Mapa ma zawierać pare klucz-wartość gdzie klucz: miasto, wartość: lista bohaterów;
-    public Map<Town, List<Hero>> mapHeroesToStartingTowns(List<Town> availableTowns, Set<Hero> availableHeroes) {
-        return null;
+    public Map<Town, List<Hero>> mapHeroesToStartingTowns(List<Town> availableTowns, Set<Hero> availableHeroes)
+    {
+        HashMap<Town, List<Hero>> map1 = new HashMap<>();
+        for(var x : availableTowns)
+        {
+           List<Hero> heroes = availableHeroes.stream()
+                                .filter(i -> i.getHeroClass().equals(x.getStartingHeroClasses()))
+                                .collect(Collectors.toList());
+        }
+        return map1;
     }
 
     //TODO metoda zwraca wybranego bohatera na podstawie miasta z którego pochodzi i imienia.
     // Jeżeli istnieje usuwa go z listy dostępnych bohaterów w danym mieście i zwraca bohatera.
     // Jeżeli nie ma go na liście dostępnych bohaterów rzuca NoSuchElementException z wiadomością HERO_NOT_FOUND + name
-    public Hero selectHeroByName(Town heroTown, String name) {
-        return null;
+    public Hero selectHeroByName(Town heroTown, String name)
+    {
+        var available = getPlayableTownsWithHeroesList();
+        if(available.containsKey(heroTown))
+        {
+            List<Hero> heroes = getPlayableTownsWithHeroesList().get(heroTown);
+            for(int i = 0; i < heroes.size(); i++)
+            {
+                Hero hero = heroes.get(i);
+                if(hero.getName().equals(name))
+                {
+                    available.remove(hero);
+                    return hero;
+                }
+            }
+        }
+        throw new NoSuchElementException(HERO_NOT_FOUND + name);
     }
 }
