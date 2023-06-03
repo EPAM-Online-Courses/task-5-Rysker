@@ -2,7 +2,7 @@ package efs.task.collections.entity;
 
 import java.util.Objects;
 
-public class Hero {
+public class Hero implements Comparable<Hero>{
     private String name;
     private String heroClass;
 
@@ -39,5 +39,10 @@ public class Hero {
     @Override
     public String toString() {
         return "My name is " + name + "and I am " + heroClass;
+    }
+
+    @Override
+    public int compareTo(Hero o) {
+        return this.getName().compareTo(o.getName());
     }
 }
