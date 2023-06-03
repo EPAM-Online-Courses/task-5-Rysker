@@ -40,7 +40,27 @@ public class GameLobby {
         }
     }
 
+    public static void main(String[] args)
+    {
+        GameLobby gl = new GameLobby();
+        gl.enableDLC();
+        gl.disableDLC();
+        List<Town> availableTowns = Arrays.asList(
+                new Town("Castle", Arrays.asList("Knight", "Sorcerer")),
+                new Town("Rampart", Arrays.asList("Ranger", "Druid")),
+                new Town("Necropolis", Arrays.asList("Necromancer", "Lich"))
+        );
 
+        Set<Hero> availableHeroes = new HashSet<>(Arrays.asList(
+                new Hero("Tyris", "Knight"),
+                new Hero("Catherine", "Knight"),
+                new Hero("Clancy", "Ranger"),
+                new Hero("Thant", "Necromancer"),
+                new Hero("Vidomina", "Necromancer"),
+                new Hero("Gelu", "Ranger")
+        ));
+        Map<Town, List<Hero>> mapa1 = gl.mapHeroesToStartingTowns(availableTowns, availableHeroes);
+    }
     //TODO Usunąć miasta i odpowiadających im bohaterów z DLC gry z mapy dostępnych
     // miast - playableTownsWithHeroesList.
     public void disableDLC()
@@ -89,13 +109,13 @@ public class GameLobby {
     {
         if(playableTownsWithHeroesList.containsKey(heroTown))
         {
-            List<Hero> heroes = getPlayableTownsWithHeroesList().get(heroTown);
-            for(int i = 0; i < heroes.size(); i++)
+            List<Hero> heroes = playableTownsWithHeroesList.get(heroTown);
+            for(Hero hero: heroes)
             {
-                Hero hero = heroes.get(i);
-                if(Objects.equals(name, hero.getName()))
+                if(hero.getName().equals(name))
                 {
-                    playableTownsWithHeroesList.remove(hero);
+                    heroes.remove(hero);
+                    playableTownsWithHeroesList.put(heroTown, heroes);
                     return hero;
                 }
             }
